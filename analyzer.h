@@ -1,10 +1,9 @@
 #ifndef ANALYZER_H
 #define ANALYZER_H
 
-#include <string>
 #include <vector>
+#include <string>
 #include <unordered_map>
-
 using namespace std;
 
 struct ZoneCount {
@@ -21,7 +20,6 @@ struct SlotCount {
 struct SlotKey {
     string zone;
     int hour;
-
     bool operator==(const SlotKey& o) const {
         return hour == o.hour && zone == o.zone;
     }
@@ -39,9 +37,7 @@ private:
     unordered_map<SlotKey, long long, SlotHash> slotCounts;
 
 public:
-    // GitHub / Term Project interface
-    void ingestFile(const string& csvPath);
-
+    void ingestStdin();
     vector<ZoneCount> topZones(int k = 10) const;
     vector<SlotCount> topBusySlots(int k = 10) const;
 };
