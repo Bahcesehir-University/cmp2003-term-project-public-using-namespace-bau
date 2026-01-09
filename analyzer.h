@@ -1,26 +1,49 @@
-#pragma once
+#ifndef ANALYZER_H
+#define ANALYZER_H
+
 #include <string>
 #include <vector>
+#include <unordered_map>
+
+using namespace std;
 
 struct ZoneCount {
-    std::string zone;
+    string zone;
     long long count;
 };
 
 struct SlotCount {
-    std::string zone;
-    int hour;              // 0–23
+    string zone;
+    int hour;
     long long count;
 };
 
-class TripAnalyzer {
-public:
-    // Parse Trips.csv, skip dirty rows, never crash
-    void ingestFile(const std::string& csvPath);
+struct SlotKey {
+    string zone;
+    int hour;
 
-    // Top K zones: count desc, zone asc
-    std::vector<ZoneCount> topZones(int k = 10) const;
-
-    // Top K slots: count desc, zone asc, hour asc
-    std::vector<SlotCount> topBusySlots(int k = 10) const;
+    bool operator==(const SlotKey& o) const {
+        return hour == o.hour && zone == o.zone;
+    }
 };
+
+struct SlotHash {
+    size_t operator()(const SlotKey& k) const {
+        return hash<string>()(k.zone) ^ (hash<int>()(k.hour) << 1);
+    }
+};
+
+class TripAnalyzer {
+private:
+    unordered_map<string, long long> zoneCounts;
+    unordered_map<SlotKey, long long, SlotHash> slotCounts;
+
+public:
+    // GitHub / Term Project interface
+    void ingestFile(const string& csvPath);
+
+    vector<ZoneCount> topZones(int k = 10) const;
+    vector<SlotCount> topBusySlots(int k = 10) const;
+};
+
+#endif
